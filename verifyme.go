@@ -23,7 +23,7 @@ type Unsigner interface {
 	Unsign(data []byte, sig []byte) error
 }
 
-// verify signed message, return true if ok
+// VerifyMessage return true if its ok
 func VerifyMessage(signedMessage, message, pathToPublicKey string) (bool, error) {
 	parser, perr := loadPublicKey(pathToPublicKey)
 	if perr != nil {
