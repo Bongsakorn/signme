@@ -24,7 +24,7 @@ type Unsigner interface {
 }
 
 // verify signed message, return true if ok
-func verify(signedMessage, message, pathToPublicKey string) (bool, error) {
+func VerifyMessage(signedMessage, message, pathToPublicKey string) (bool, error) {
 	parser, perr := loadPublicKey(pathToPublicKey)
 	if perr != nil {
 		return false, fmt.Errorf("could not sign request: %v", perr.Error())
