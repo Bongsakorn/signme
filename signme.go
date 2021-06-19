@@ -26,13 +26,12 @@ type Signer interface {
 }
 
 // SignMessage TODO
-func SignMessage(timestamp, message, pathToPrivateKey, format string) (string, error) {
+func SignMessage(message, pathToPrivateKey, format string) (string, error) {
 	signer, err := loadPrivateKey(pathToPrivateKey)
 	if err != nil {
 		return "", err
 	}
-	messageToSign := timestamp + message
-	signedMessage, err := signer.Sign([]byte(messageToSign))
+	signedMessage, err := signer.Sign([]byte(message))
 	if err != nil {
 		return "", err
 	}
