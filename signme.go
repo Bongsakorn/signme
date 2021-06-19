@@ -7,6 +7,7 @@ import (
 	"crypto/sha256"
 	"crypto/x509"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/pem"
 	"errors"
 	"fmt"
@@ -25,18 +26,28 @@ type Signer interface {
 }
 
 // SignMessage TODO
-func SignMessage(timestamp, message, pathToPrivateKey string) (string, error) {
+func SignMessage(message, pathToPrivateKey, format string) (string, error) {
 	signer, err := loadPrivateKey(pathToPrivateKey)
 	if err != nil {
 		return "", err
 	}
-	messageToSign := timestamp + message
-	signedMessage, err := signer.Sign([]byte(messageToSign))
+	signedMessage, err := signer.Sign([]byte(message))
 	if err != nil {
 		return "", err
 	}
-	signKey := base64.StdEncoding.EncodeToString(signedMessage)
-	return fmt.Sprintf("digest-alg=RSA-SHA;key-id=KEY:RSA:rsf.org;data=%s", signKey), nil
+
+	switch format {
+	case "base64":
+		signKey := base64.StdEncoding.EncodeToString(signedMessage)
+		return fmt.Sprintf("digest-alg=RSA-SHA;key-id=KEY:RSA:rsf.org;data=%s", signKey), nil
+	case "hex":
+		signKey := hex.EncodeToString(signedMessage)
+		return fmt.Sprintf("%s", string(signKey)), nil
+	default:
+		signKey := base64.StdEncoding.EncodeToString(signedMessage)
+		return fmt.Sprintf("digest-alg=RSA-SHA;key-id=KEY:RSA:rsf.org;data=%s", signKey), nil
+	}
+
 }
 
 // loadPrivateKey loads an parses a PEM encoded private key file.

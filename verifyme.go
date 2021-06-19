@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"crypto/x509"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/pem"
 	"errors"
 	"fmt"
@@ -24,13 +25,22 @@ type Unsigner interface {
 }
 
 // verify signed message, return true if ok
-func verify(signedMessage, message, pathToPublicKey string) (bool, error) {
+func verify(signedMessage, message, pathToPublicKey, format string) (bool, error) {
 	parser, perr := loadPublicKey(pathToPublicKey)
 	if perr != nil {
 		return false, fmt.Errorf("could not sign request: %v", perr.Error())
 	}
 
-	signed, _ := base64.StdEncoding.DecodeString(signedMessage)
+	var signed []byte
+	switch format {
+	case "base64":
+		signed, _ = base64.StdEncoding.DecodeString(signedMessage)
+	case "hex":
+		signed, _ = hex.DecodeString(signedMessage)
+	default:
+		signed, _ = base64.StdEncoding.DecodeString(signedMessage)
+	}
+
 	err := parser.Unsign([]byte(message), signed)
 	if err != nil {
 		return false, fmt.Errorf("could not sign request: %v", err.Error())
