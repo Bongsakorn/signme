@@ -25,7 +25,7 @@ type Unsigner interface {
 }
 
 // verify signed message, return true if ok
-func verify(signedMessage, message, pathToPublicKey, format string) (bool, error) {
+func VerifyMessage(signedMessage, message, pathToPublicKey, format string) (bool, error) {
 	parser, perr := loadPublicKey(pathToPublicKey)
 	if perr != nil {
 		return false, fmt.Errorf("could not sign request: %v", perr.Error())
@@ -73,6 +73,12 @@ func parsePublicKey(pemBytes []byte) (Unsigner, error) {
 			return nil, err
 		}
 		rawkey = rsa
+	case "CERTIFICATE":
+		rsa, err := x509.ParseCertificate(block.Bytes)
+		if err != nil {
+			return nil, err
+		}
+		rawkey = rsa.PublicKey
 	default:
 		return nil, fmt.Errorf("ssh: unsupported key type %q", block.Type)
 	}
