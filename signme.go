@@ -12,6 +12,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"strings"
 
 	"golang.org/x/crypto/pkcs12"
 )
@@ -60,8 +61,8 @@ func loadPrivateKey(path string) (Signer, error) {
 		return nil, err
 	}
 
-	keyType := strings.split(path, ".")
-	switch keyType {
+	keyType := strings.Split(path, ".")
+	switch keyType[1] {
 	case "pem":
 		return parsePrivateKey(data)
 	case "p12":
@@ -94,10 +95,9 @@ func parsePrivateKey(pemBytes []byte) (Signer, error) {
 
 func parsePkcs12Key(keyBytes []byte) (Signer, error) {
 	password := ""
-	privk, _, err := pkcs12.Decode(b, password)
+	privk, _, err := pkcs12.Decode(keyBytes, password)
 	if err != nil {
-		fmt.Println(err)
-		return
+		return nil, errors.New("ssh: no key found")
 	}
 	pv := privk.(*rsa.PrivateKey)
 
