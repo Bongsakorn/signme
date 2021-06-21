@@ -13,7 +13,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
-	"strings"
 
 	"golang.org/x/crypto/pkcs12"
 )
@@ -62,8 +61,8 @@ func loadPrivateKey(path string) (Signer, error) {
 		return nil, err
 	}
 
-	extension := strings.TrimSuffix(path, filepath.Ext(path))
-	switch extension {
+	extension := filepath.Ext("ARL-key-pairs.p12")
+	switch extension[1:] {
 	case "pem":
 		return parsePrivateKey(data)
 	case "p12":
