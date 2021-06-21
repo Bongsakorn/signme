@@ -73,6 +73,12 @@ func parsePublicKey(pemBytes []byte) (Unsigner, error) {
 			return nil, err
 		}
 		rawkey = rsa
+	case "CERTIFICATE":
+		rsa, err := x509.ParseCertificate(block.Bytes)
+		if err != nil {
+			return nil, err
+		}
+		rawkey = rsa.PublicKey
 	default:
 		return nil, fmt.Errorf("ssh: unsupported key type %q", block.Type)
 	}

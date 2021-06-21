@@ -12,6 +12,8 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+
+	"golang.org/x/crypto/pkcs12"
 )
 
 type rsaPrivateKey struct {
@@ -57,7 +59,16 @@ func loadPrivateKey(path string) (Signer, error) {
 	if err != nil {
 		return nil, err
 	}
-	return parsePrivateKey(data)
+
+	keyType := strings.split(path, ".")
+	switch keyType {
+	case "pem":
+		return parsePrivateKey(data)
+	case "p12":
+		return parsePkcs12Key(data)
+	default:
+		return parsePrivateKey(data)
+	}
 }
 
 // parsePublicKey parses a PEM encoded private key.
@@ -79,6 +90,18 @@ func parsePrivateKey(pemBytes []byte) (Signer, error) {
 		return nil, fmt.Errorf("ssh: unsupported key type %q", block.Type)
 	}
 	return newSignerFromKey(rawkey)
+}
+
+func parsePkcs12Key(keyBytes []byte) (Signer, error) {
+	password := ""
+	privk, _, err := pkcs12.Decode(b, password)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	pv := privk.(*rsa.PrivateKey)
+
+	return newSignerFromKey(pv)
 }
 
 func newSignerFromKey(k interface{}) (Signer, error) {
