@@ -61,7 +61,7 @@ func loadPrivateKey(path string) (Signer, error) {
 		return nil, err
 	}
 
-	extension := filepath.Ext("ARL-key-pairs.p12")
+	extension := filepath.Ext(path)
 	switch extension[1:] {
 	case "pem":
 		return parsePrivateKey(data)
